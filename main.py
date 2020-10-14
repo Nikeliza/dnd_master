@@ -38,16 +38,16 @@ class Monsters():
         return mas_monster
 
 class SettingsWindow(Toplevel):
-    def __init__(self):
+    def __init__(self, sel_monst, sel_her):
         Toplevel.__init__(self)
         #self.master = master
         #self.pack(fill=BOTH, expand=1)
 
         self.heroes = Heroes()
-        self.selected_heroes = self.heroes.get_names_heroes()
+        self.selected_heroes = sel_her
 
         self.monsters = Monsters()
-        self.selected_monsters = []
+        self.selected_monsters = sel_monst
 
         self._init_obj_heroes()
         self._init_obj_monsters()
@@ -58,13 +58,17 @@ class SettingsWindow(Toplevel):
         self.combo_monsters.current(0)  # установите вариант по умолчанию
         self.combo_monsters.grid(column=3, row=1)
 
+        self.spin_monsters = Spinbox(self, from_=1, to=100)
+        self.spin_monsters.grid(column=4, row=1)
+
         self.lbl_monsters = Label(self, text="Монстры", font=("Arial", 18))
         self.lbl_monsters.grid(column=3, row=0)
         self.lbl_selected_monsters = Label(self, text=self.get_selected(self.selected_monsters), font=("Arial", 14))
         self.lbl_selected_monsters.grid(column=3, row=2)
 
+
         self.btn_add_delete_monsters = Button(self, text="Добавить/удалить", command=self.clicked_add_delete_monsters)
-        self.btn_add_delete_monsters.grid(column=4, row=1)
+        self.btn_add_delete_monsters.grid(column=5, row=1)
 
     def _init_obj_heroes(self):
         self.combo_heroes = Combobox(self, state="readonly")
@@ -87,10 +91,10 @@ class SettingsWindow(Toplevel):
             self.selected_heroes.append(self.combo_heroes.get())
 
     def update_selected_monsters(self):
-        if self.combo_monsters.get() in self.selected_monsters:
-            self.selected_monsters.remove(self.combo_monsters.get())
+        if self.combo_monsters.get() in self.selected_monsters.keys():
+            self.selected_monsters.pop(self.combo_monsters.get())
         else:
-            self.selected_monsters.append(self.combo_monsters.get())
+            self.selected_monsters[self.combo_monsters.get()] = self.spin_monsters.get()
 
     def get_selected(self, thing):
         result_str = ''
@@ -115,8 +119,17 @@ class MainWindow(Frame):
         self.btn_add_delete_monsters = Button(text="открыть настройки", command=self.clicked)
         self.btn_add_delete_monsters.grid(column=4, row=1)
 
+        self.heroes = Heroes()
+        self.selected_heroes = self.heroes.get_names_heroes()
+
+        self.monsters = Monsters()
+        self.selected_monsters = {}
+
+
     def clicked(self):
-        w = SettingsWindow()
+        w = SettingsWindow(self.selected_monsters, self.selected_heroes)
+        w.wait_window()
+        print('Selected:', w.selected_monsters, w.selected_heroes)
 
 
 
