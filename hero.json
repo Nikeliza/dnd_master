@@ -1,0 +1,30 @@
+{
+  "heros": [
+    {
+      "name": "Рюрик",
+      "KD": 18,
+      "iniziation": -1
+
+    },
+    {
+      "name": "Бри",
+      "KD": 14,
+      "iniziation": 3
+    },
+    {
+      "name": "Элиот",
+      "KD": 14,
+      "iniziation": 3
+    },
+    {
+      "name": "Эльгир",
+      "KD": 12,
+      "iniziation": 2
+    },
+    {
+      "name": "Куара",
+      "KD": 14,
+      "iniziation": 3
+    }
+  ]
+}
