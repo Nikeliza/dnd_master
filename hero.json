@@ -3,28 +3,32 @@
     {
       "name": "Рюрик",
       "KD": 18,
-      "iniziation": -1
-
+      "iniziation": -1,
+      "hit": 11
     },
     {
       "name": "Бри",
       "KD": 14,
-      "iniziation": 3
+      "iniziation": 3,
+      "hit": 9
     },
     {
       "name": "Элиот",
       "KD": 14,
-      "iniziation": 3
+      "iniziation": 3,
+      "hit": 9
     },
     {
       "name": "Эльгир",
       "KD": 12,
-      "iniziation": 2
+      "iniziation": 2,
+      "hit": 8
     },
     {
       "name": "Куара",
       "KD": 14,
-      "iniziation": 3
+      "iniziation": 3,
+      "hit": 12
     }
   ]
 }
