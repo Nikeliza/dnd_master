@@ -1,7 +1,7 @@
 import json
 from tkinter import *
 from tkinter.ttk import Combobox
-
+import random
 
 
 
@@ -41,6 +41,11 @@ class Monsters():
         for i in self.mas_monsters_info['monsters']:
             mas_monster.append(i['name'])
         return mas_monster
+
+    def get_info_monster_for_name(self, name):
+        for i in range(len(self.mas_monsters_info['monsters'])):
+            if self.mas_monsters_info['monsters'][i]['name'] == name:
+                return self.mas_monsters_info['monsters'][i]
 
 class SettingsWindow(Toplevel):
     def __init__(self, sel_monst, sel_her):
@@ -128,45 +133,80 @@ class MainWindow(Frame):
         Frame.__init__(self, master)
         self.master = master
         #self.pack(fill=BOTH, expand=1)
-        self.btn_add_delete_monsters = Button(text="открыть настройки", command=self.clicked)
-        self.btn_add_delete_monsters.grid(column=4, row=1)
+
+        self.mainmenu = Menu(self.master)
+        self.master.config(menu=self.mainmenu)
+        self.mainmenu.add_command(label='Настройки', command=self.clicked_setting)
 
         self.heroes = Heroes()
-        self.selected_heroes = self.heroes.get_names_heroes()
-        self.battle_heroes = self.selected_heroes
+        self.battle_heroes = self.heroes.get_names_heroes()
 
         self.monsters = Monsters()
-        self.selected_monsters = {}
         self.battle_monsters = {}
 
-        self.los = Listbox()
-        for i in self.selected_heroes:
-            self.los.insert(0, i)
+        self._init_obj_heroes()
+        self._init_obj_monsters()
 
-        self.los.bind('<<ListboxSelect>>', self.on_select)
-        self.los.bind("<Double-Button-1>", self.on_double_click)
-        self.los.grid(column=1, row=0)
+    def _init_obj_heroes(self):
+        self.lbl_heroes = Label(text='Герои')
+        self.lbl_heroes.grid(column=0, row=0)
 
-    def on_double_click(self, event):
-        w = InfoWindowHero(self.los.get(self.los.curselection()))
+        self.list_box_heroes = Listbox()
+        self.fill_list_box_heroes()
+        self.list_box_heroes.bind('<<ListboxSelect>>', self.on_select_hero)
+        self.list_box_heroes.bind("<Double-Button-1>", self.on_double_click_hero)
+        self.list_box_heroes.grid(column=0, row=1)
 
+    def _init_obj_monsters(self):
+        self.lbl_monsters = Label(text='Монстры')
+        self.lbl_monsters.grid(column=1, row=0)
 
-    def on_select(self, event):
+        self.list_box_monsters = Listbox()
+        self.fill_list_box_monsters()
+        self.list_box_monsters.bind('<<ListboxSelect>>', self.on_select_monster)
+        self.list_box_monsters.bind("<Double-Button-1>", self.on_double_click_monster)
+        self.list_box_monsters.grid(column=1, row=1)
+
+    def fill_list_box_heroes(self):
+        for i in self.battle_heroes:
+            self.list_box_heroes.insert(0, i)
+
+    def fill_list_box_monsters(self):
+        for i in self.battle_monsters:
+            for j in range(int(self.battle_monsters[i])):
+                self.list_box_monsters.insert(0, i + ' ' + str(j + 1))
+
+    def on_double_click_hero(self, event):
+        w = InfoWindowHero(self.list_box_heroes.get(self.list_box_heroes.curselection()))
+
+    def on_double_click_monster(self, event):
+        kost = self.list_box_monsters.get(self.list_box_monsters.curselection())
+        kost = kost.split()
+        name = ''
+        for i in kost[:len(kost) - 2]:
+            name += i + ' '
+        name += kost[len(kost) - 2]
+        w = InfoWindowMonster(name)
+
+    def on_select_hero(self, event):
         # los.curselection() - получение индекса выделенного элемента
         # los.get() - получение элемента по его индексу
-        print(self.los.get(self.los.curselection()))
+        print(self.list_box_heroes.get(self.list_box_heroes.curselection()))
 
+    def on_select_monster(self, event):
+        # los.curselection() - получение индекса выделенного элемента
+        # los.get() - получение элемента по его индексу
+        print(self.list_box_monsters.get(self.list_box_monsters.curselection()))
 
-    def clicked(self):
-        self.los.delete(0, len(self.battle_heroes))
-        w = SettingsWindow(self.selected_monsters, self.selected_heroes)
+    def clicked_setting(self):
+        self.list_box_heroes.delete(0, len(self.battle_heroes))
+        self.list_box_monsters.delete(0, len(self.battle_monsters))
+        w = SettingsWindow(self.battle_monsters, self.battle_heroes)
         w.wait_window()
         self.battle_heroes = w.selected_heroes
         self.battle_monsters = w.selected_monsters
-
-        for i in self.battle_heroes:
-            self.los.insert(0, i)
-        print('Selected:', w.selected_monsters, w.selected_heroes)
+        self.fill_list_box_heroes()
+        self.fill_list_box_monsters()
 
 class InfoWindowHero(Toplevel):
     def __init__(self, name):
@@ -185,7 +225,26 @@ class InfoWindowHero(Toplevel):
         self.text.insert(0, str(self.hero['KD']))
         self.text.grid(column=4, row=0)
 
+class InfoWindowMonster(Toplevel):
+    def __init__(self, name, monster=None):
+        Toplevel.__init__(self)
+        #self.master = master
+        #self.pack(fill=BOTH, expand=1)
 
+        self.lbl = Label(self, text=name, font=("Arial", 18))
+        self.lbl.grid(column=3, row=0)
+
+        self.monster = Monsters().get_info_monster_for_name(name)
+        self.hit = 0
+        for i in range(int(self.monster['Hit_ch_k'])):
+            self.hit += random.randint(1, int(self.monster['Hit_num_k']))
+        self.hit += int(self.monster['Hit_plus'])
+        print(self.monster)
+        #self.kd = self.heroes['heros'][]
+
+        self.text = Entry(self)
+        self.text.insert(0, str(self.hit))
+        self.text.grid(column=4, row=0)
 
 
 
