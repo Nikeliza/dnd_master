@@ -3,8 +3,6 @@ from tkinter import *
 from tkinter.ttk import Combobox
 import random
 
-
-
 class Heroes():
 
     def __init__(self):
@@ -46,6 +44,34 @@ class Monsters():
         for i in range(len(self.mas_monsters_info['monsters'])):
             if self.mas_monsters_info['monsters'][i]['name'] == name:
                 return self.mas_monsters_info['monsters'][i]
+
+
+
+class Monster():
+    def __init__(self, monster, count=1):
+        self.monster = monster
+        self.hit = self.generation_hit()
+        self.count = count
+
+    def get_name_with_number(self):
+        return self.monster['name'] + ' ' + str(self.count)
+
+    def get_name(self):
+        return self.monster['name']
+
+    def generation_hit(self):
+        hit = 0
+        for i in range(int(self.monster['Hit_ch_k'])):
+            hit += random.randint(1, int(self.monster['Hit_num_k']))
+        hit += int(self.monster['Hit_plus'])
+        return hit
+
+    def get_hit(self):
+        return self.hit
+
+    def set_hit(self, hit):
+        self.hit = hit
+
 
 class SettingsWindow(Toplevel):
     def __init__(self, sel_monst, sel_her):
@@ -137,12 +163,16 @@ class MainWindow(Frame):
         self.mainmenu = Menu(self.master)
         self.master.config(menu=self.mainmenu)
         self.mainmenu.add_command(label='Настройки', command=self.clicked_setting)
+        self.mainmenu.add_command(label='Обновить все', command=self.clicked_refresh_all)
 
         self.heroes = Heroes()
-        self.battle_heroes = self.heroes.get_names_heroes()
+        self.battle_heroes_name = self.heroes.get_names_heroes()
+        self.hero_window = {}
 
         self.monsters = Monsters()
+        self.battle_monsters_name = {}
         self.battle_monsters = {}
+        self.monster_window = {}
 
         self._init_obj_heroes()
         self._init_obj_monsters()
@@ -168,25 +198,26 @@ class MainWindow(Frame):
         self.list_box_monsters.grid(column=1, row=1)
 
     def fill_list_box_heroes(self):
-        for i in self.battle_heroes:
+        for i in self.battle_heroes_name:
             self.list_box_heroes.insert(0, i)
 
     def fill_list_box_monsters(self):
         for i in self.battle_monsters:
-            for j in range(int(self.battle_monsters[i])):
-                self.list_box_monsters.insert(0, i + ' ' + str(j + 1))
+            self.list_box_monsters.insert(0, self.battle_monsters[i].get_name_with_number())
 
     def on_double_click_hero(self, event):
-        w = InfoWindowHero(self.list_box_heroes.get(self.list_box_heroes.curselection()))
+        name = self.list_box_heroes.get(self.list_box_heroes.curselection())
+        self.hero_window[name] = InfoWindowHero(self.heroes.get_info_hero_for_name(name))
+
+
+
 
     def on_double_click_monster(self, event):
         kost = self.list_box_monsters.get(self.list_box_monsters.curselection())
-        kost = kost.split()
-        name = ''
-        for i in kost[:len(kost) - 2]:
-            name += i + ' '
-        name += kost[len(kost) - 2]
-        w = InfoWindowMonster(name)
+        if kost not in self.monster_window.keys():
+            self.monster_window[kost] = InfoWindowMonster(self.battle_monsters[kost])
+            self.monster_window[kost].wait_window()
+
 
     def on_select_hero(self, event):
         # los.curselection() - получение индекса выделенного элемента
@@ -198,57 +229,65 @@ class MainWindow(Frame):
         # los.get() - получение элемента по его индексу
         print(self.list_box_monsters.get(self.list_box_monsters.curselection()))
 
+    def refresh_battle_monster(self):
+        self.battle_monsters = {}
+        for i in self.battle_monsters_name:
+            for j in range(int(self.battle_monsters_name[i])):
+                self.battle_monsters[i + ' ' + str(j + 1)] = Monster(Monsters().get_info_monster_for_name(i), j + 1)
+
     def clicked_setting(self):
-        self.list_box_heroes.delete(0, len(self.battle_heroes))
-        self.list_box_monsters.delete(0, len(self.battle_monsters))
-        w = SettingsWindow(self.battle_monsters, self.battle_heroes)
+        self.list_box_heroes.delete(0, len(self.battle_heroes_name))
+        self.list_box_monsters.delete(0, len(self.battle_monsters_name))
+        w = SettingsWindow(self.battle_monsters_name, self.battle_heroes_name)
         w.wait_window()
-        self.battle_heroes = w.selected_heroes
-        self.battle_monsters = w.selected_monsters
+        self.battle_heroes_name = w.selected_heroes
+        self.battle_monsters_name = w.selected_monsters
+        self.refresh_battle_monster()
+
         self.fill_list_box_heroes()
         self.fill_list_box_monsters()
 
+    def clicked_refresh_all(self):
+        for i in self.monster_window:
+            print(self.monster_window[i].monster.get_hit())
+            print(self.monster_window[i].monster.get_name_with_number())
+            print(self.battle_monsters[
+                      self.monster_window[i].monster.get_name_with_number()
+                  ].get_hit())
+            self.battle_monsters[self.monster_window[i].monster.get_name_with_number()].set_hit(self.monster_window[i].monster.get_hit())
+
+
 class InfoWindowHero(Toplevel):
-    def __init__(self, name):
+    def __init__(self, hero):
         Toplevel.__init__(self)
         #self.master = master
         #self.pack(fill=BOTH, expand=1)
 
-        self.lbl = Label(self, text=name, font=("Arial", 18))
+        self.lbl = Label(self, text=hero['name'], font=("Arial", 18))
         self.lbl.grid(column=3, row=0)
 
-        self.hero = Heroes().get_info_hero_for_name(name)
+        self.hero = hero
         print(self.hero)
         #self.kd = self.heroes['heros'][]
 
         self.text = Entry(self)
-        self.text.insert(0, str(self.hero['KD']))
+        self.text.insert(0, str(self.hero['hit']))
         self.text.grid(column=4, row=0)
 
 class InfoWindowMonster(Toplevel):
-    def __init__(self, name, monster=None):
+    def __init__(self, monster):
         Toplevel.__init__(self)
         #self.master = master
         #self.pack(fill=BOTH, expand=1)
 
-        self.lbl = Label(self, text=name, font=("Arial", 18))
+        self.lbl = Label(self, text=monster.get_name_with_number(), font=("Arial", 18))
         self.lbl.grid(column=3, row=0)
 
-        self.monster = Monsters().get_info_monster_for_name(name)
-        self.hit = 0
-        for i in range(int(self.monster['Hit_ch_k'])):
-            self.hit += random.randint(1, int(self.monster['Hit_num_k']))
-        self.hit += int(self.monster['Hit_plus'])
-        print(self.monster)
-        #self.kd = self.heroes['heros'][]
+        self.monster = monster
 
         self.text = Entry(self)
-        self.text.insert(0, str(self.hit))
+        self.text.insert(0, str(self.monster.get_hit()))
         self.text.grid(column=4, row=0)
-
-
-
-
 
 root = Tk()
 app = MainWindow(root)
