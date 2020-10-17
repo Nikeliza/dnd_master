@@ -29,6 +29,12 @@
       "KD": 14,
       "iniziation": 3,
       "hit": 12
+    },
+    {
+      "name": "Сильдар",
+      "KD": 16,
+      "iniziation": 0,
+      "hit": 27
     }
   ]
 }
