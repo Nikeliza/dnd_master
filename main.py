@@ -207,17 +207,18 @@ class MainWindow(Frame):
 
     def on_double_click_hero(self, event):
         name = self.list_box_heroes.get(self.list_box_heroes.curselection())
-        self.hero_window[name] = InfoWindowHero(self.heroes.get_info_hero_for_name(name))
-
-
+        try:
+            self.hero_window[name].state()
+        except:
+            self.hero_window[name] = InfoWindowHero(self.heroes.get_info_hero_for_name(name))
 
 
     def on_double_click_monster(self, event):
         kost = self.list_box_monsters.get(self.list_box_monsters.curselection())
-        if kost not in self.monster_window.keys():
+        try:
+            print(self.monster_window[kost].state())
+        except:
             self.monster_window[kost] = InfoWindowMonster(self.battle_monsters[kost])
-            self.monster_window[kost].wait_window()
-
 
     def on_select_hero(self, event):
         # los.curselection() - получение индекса выделенного элемента
@@ -249,12 +250,12 @@ class MainWindow(Frame):
 
     def clicked_refresh_all(self):
         for i in self.monster_window:
-            print(self.monster_window[i].monster.get_hit())
-            print(self.monster_window[i].monster.get_name_with_number())
+            #print(self.monster_window[i].get_hit())
+            #print(self.monster_window[i].get_name())
             print(self.battle_monsters[
-                      self.monster_window[i].monster.get_name_with_number()
+                      self.monster_window[i].get_name()
                   ].get_hit())
-            self.battle_monsters[self.monster_window[i].monster.get_name_with_number()].set_hit(self.monster_window[i].monster.get_hit())
+            #self.battle_monsters[self.monster_window[i].get_name()].set_hit(self.monster_window[i].get_hit())
 
 
 class InfoWindowHero(Toplevel):
@@ -288,6 +289,16 @@ class InfoWindowMonster(Toplevel):
         self.text = Entry(self)
         self.text.insert(0, str(self.monster.get_hit()))
         self.text.grid(column=4, row=0)
+
+        self.bind('<Return>', self.click_enter)
+
+    def click_enter(self, event):
+        self.monster.set_hit(int(self.text.get()))
+
+    def get_name(self):
+        return self.monster.get_name_with_number()
+    def get_hit(self):
+        return self.monster.get_hit()
 
 root = Tk()
 app = MainWindow(root)
