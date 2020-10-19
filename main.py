@@ -24,6 +24,12 @@ class Heroes():
             if self.mas_hero_info['heros'][i]['name'] == name:
                 return self.mas_hero_info['heros'][i]
 
+    def print_info_hero_for_name(self, name):
+        hero = self.get_info_hero_for_name(name)
+        return 'Имя:  ' + hero['name'] + \
+               '\nКД:     ' + str(hero['KD']) + \
+               '\nХиты: ' + str(hero['hit'])
+
 class Monsters():
 
     def __init__(self):
@@ -44,8 +50,6 @@ class Monsters():
         for i in range(len(self.mas_monsters_info['monsters'])):
             if self.mas_monsters_info['monsters'][i]['name'] == name:
                 return self.mas_monsters_info['monsters'][i]
-
-
 
 class Monster():
     def __init__(self, monster, count=1):
@@ -72,6 +76,13 @@ class Monster():
     def set_hit(self, hit):
         self.hit = hit
 
+    def print_info_for_battle(self):
+        return "Имя:               " + self.monster['name'] + \
+               "\nКД:                  " + str(self.monster['KD']) + \
+               "\nТип доспеха: " + self.monster['type_KD'] + \
+               "\nСкорость:      " + str(self.monster['Speed']) + \
+               "\nУязвимость:  " + str(self.monster['uazv']) + \
+               "\nИммунитет:  " + str(self.monster['immun'])
 
 class SettingsWindow(Toplevel):
     def __init__(self, sel_monst, sel_her):
@@ -176,10 +187,14 @@ class MainWindow(Frame):
 
         self._init_obj_heroes()
         self._init_obj_monsters()
+        self._init_obj_battle()
 
     def _init_obj_heroes(self):
         self.lbl_heroes = Label(text='Герои')
         self.lbl_heroes.grid(column=0, row=0)
+
+        self.lbl_info_heroes = Label(justify=LEFT)
+        self.lbl_info_heroes.grid(column=2, row=1)
 
         self.list_box_heroes = Listbox()
         self.fill_list_box_heroes()
@@ -191,11 +206,21 @@ class MainWindow(Frame):
         self.lbl_monsters = Label(text='Монстры')
         self.lbl_monsters.grid(column=1, row=0)
 
+        self.lbl_info_monsters = Label(justify=LEFT)
+        self.lbl_info_monsters.grid(column=3, row=1)
+
         self.list_box_monsters = Listbox()
         self.fill_list_box_monsters()
         self.list_box_monsters.bind('<<ListboxSelect>>', self.on_select_monster)
         self.list_box_monsters.bind("<Double-Button-1>", self.on_double_click_monster)
         self.list_box_monsters.grid(column=1, row=1)
+
+    def _init_obj_battle(self):
+        self.lbl_battle = Label()
+        self.lbl_battle.grid(column=0, row=3)
+
+        self.btn_battle = Button(text="Сражение")
+        self.btn_battle.grid(column=1, row=3)
 
     def fill_list_box_heroes(self):
         for i in self.battle_heroes_name:
@@ -223,11 +248,10 @@ class MainWindow(Frame):
     def on_select_hero(self, event):
         # los.curselection() - получение индекса выделенного элемента
         # los.get() - получение элемента по его индексу
-        print(self.list_box_heroes.get(self.list_box_heroes.curselection()))
+        self.lbl_info_heroes.configure(text=self.heroes.print_info_hero_for_name(self.list_box_heroes.get(self.list_box_heroes.curselection())))
 
     def on_select_monster(self, event):
-        # los.curselection() - получение индекса выделенного элемента
-        # los.get() - получение элемента по его индексу
+        self.lbl_info_monsters.configure(text=self.battle_monsters[self.list_box_monsters.get(self.list_box_monsters.curselection())].print_info_for_battle())
         print(self.list_box_monsters.get(self.list_box_monsters.curselection()))
 
     def refresh_battle_monster(self):
