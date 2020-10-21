@@ -23,12 +23,21 @@ class Heroes():
         for i in range(len(self.mas_hero_info['heros'])):
             if self.mas_hero_info['heros'][i]['name'] == name:
                 return self.mas_hero_info['heros'][i]
+        return None
 
     def print_info_hero_for_name(self, name):
         hero = self.get_info_hero_for_name(name)
+        if hero is None:
+            return ''
         return 'Имя:  ' + hero['name'] + \
                '\nКД:     ' + str(hero['KD']) + \
                '\nХиты: ' + str(hero['hit'])
+
+    def get_iniz_for_name(self, name):
+        hero = self.get_info_hero_for_name(name)
+        if hero is None:
+            return -100
+        return random.randint(1, 21) + hero["iniziation"]
 
 class Monsters():
 
@@ -50,6 +59,13 @@ class Monsters():
         for i in range(len(self.mas_monsters_info['monsters'])):
             if self.mas_monsters_info['monsters'][i]['name'] == name:
                 return self.mas_monsters_info['monsters'][i]
+        return None
+
+    def get_iniz_for_name(self, name):
+        monster = self.get_info_monster_for_name(name)
+        if monster is None:
+            return -100
+        return random.randint(1, 21) + monster["Lovkost"]
 
 class Monster():
     def __init__(self, monster, count=1):
@@ -75,6 +91,9 @@ class Monster():
 
     def set_hit(self, hit):
         self.hit = hit
+
+    def get_iniz(self):
+        return random.randint(1, 21) + self.monster["Lovkost"]
 
     def print_info_for_battle(self):
         return "Имя:               " + self.monster['name'] + \
@@ -175,6 +194,7 @@ class MainWindow(Frame):
         self.master.config(menu=self.mainmenu)
         self.mainmenu.add_command(label='Настройки', command=self.clicked_setting)
         self.mainmenu.add_command(label='Обновить все', command=self.clicked_refresh_all)
+        self.mainmenu.add_command(label="Обновить инициативу", command=self.clicked_update_iniziation)
 
         self.heroes = Heroes()
         self.battle_heroes_name = self.heroes.get_names_heroes()
@@ -221,6 +241,9 @@ class MainWindow(Frame):
 
         self.btn_battle = Button(text="Сражение")
         self.btn_battle.grid(column=1, row=3)
+
+        self.lbl_iniziation = Label()
+        self.lbl_iniziation.grid(column=4, row=1)
 
     def fill_list_box_heroes(self):
         for i in self.battle_heroes_name:
@@ -281,6 +304,36 @@ class MainWindow(Frame):
                   ].get_hit())
             #self.battle_monsters[self.monster_window[i].get_name()].set_hit(self.monster_window[i].get_hit())
 
+    def clicked_update_iniziation(self):
+        mas_iniz = []
+        for i in self.battle_heroes_name:
+            mas_iniz.append([i, self.heroes.get_iniz_for_name(i)])
+        for i in self.battle_monsters:
+            if self.battle_monsters[i].get_name() not in [x[0] for x in mas_iniz]:
+                mas_iniz.append([self.battle_monsters[i].get_name(), self.battle_monsters[i].get_iniz()])
+
+        flag = True
+        while flag:
+            flag = False
+            mas_iniz = sorted(mas_iniz, key=sort_2, reverse=True)
+            for i in range(len(mas_iniz) - 1):
+                if mas_iniz[i][1] == mas_iniz[i + 1][1]:
+                    flag = True
+                    mas_iniz[i][1] = self.heroes.get_iniz_for_name(mas_iniz[i][0])
+                    if mas_iniz[i][1] == -100:
+                        mas_iniz[i][1] = self.monsters.get_iniz_for_name(mas_iniz[i][0])
+                    mas_iniz[i + 1][1] = self.heroes.get_iniz_for_name(mas_iniz[i + 1][0])
+                    if mas_iniz[i + 1][1] == -100:
+                        mas_iniz[i + 1][1] = self.monsters.get_iniz_for_name(mas_iniz[i + 1][0])
+                    break
+
+        str_iniz = ""
+        for i in mas_iniz:
+            str_iniz += str(i[0]) + " " + str(i[1]) + "\n"
+        self.lbl_iniziation.configure(text=str_iniz)
+
+def sort_2(el):
+    return el[1]
 
 class InfoWindowHero(Toplevel):
     def __init__(self, hero):
