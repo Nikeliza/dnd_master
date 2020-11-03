@@ -95,13 +95,231 @@ class Monster():
     def get_iniz(self):
         return random.randint(1, 21) + self.monster["Lovkost"]
 
+    def get_info_speed(self):
+        result_str = str(self.monster['Speed']['run']) + " ("
+
+        if self.monster['Speed']['fly'] != 0:
+            result_str += "летая " + str(self.monster['Speed']['fly'])
+
+        if self.monster['Speed']['laz'] != 0:
+            if result_str[-1] != '(':
+                result_str += ', '
+            result_str += "лазая " + str(self.monster['Speed']['laz'])
+
+        if self.monster['Speed']['swim'] != 0:
+            if result_str[-1] != '(':
+                result_str += ', '
+            result_str += "плавая " + str(self.monster['Speed']['swim'])
+
+        result_str += ')'
+        return result_str
+
+    def get_info_uaz(self):
+        result_str = ""
+        a = 1
+        k = 15
+        flag = True
+        for i in self.monster['uazv']:
+            if len(result_str) > k * a:
+                result_str += '\n'
+                if flag == True:
+                    k = len(result_str)
+                    flag = False
+                a += 1
+            result_str += i + ', '
+        if len(result_str) > 0:
+            result_str = result_str[0: len(result_str) - 2]
+        return result_str
+
+    def get_info_sopr(self):
+        result_str = ""
+        a = 1
+        k = 15
+        flag = True
+        for i in self.monster['sopr']:
+            if len(result_str) > k * a:
+                result_str += '\n'
+                if flag == True:
+                    k = len(result_str)
+                    flag = False
+                a += 1
+            result_str += i + ', '
+        if len(result_str) > 0:
+            result_str = result_str[0: len(result_str) - 2]
+        return result_str
+
+    def get_info_immun(self):
+        result_str = ""
+        a = 1
+        k = 15
+        flag = True
+        for i in self.monster['immun']:
+            if len(result_str) > k * a:
+                result_str += '\n'
+                if flag == True:
+                    k = len(result_str)
+                    flag = False
+                a += 1
+            result_str += i + ', '
+        if len(result_str) > 0:
+            result_str = result_str[0: len(result_str) - 2]
+        return result_str
+
     def print_info_for_battle(self):
-        return "Имя:               " + self.monster['name'] + \
+        result_str = "Имя:               " + self.monster['name'] + \
                "\nКД:                  " + str(self.monster['KD']) + \
-               "\nТип доспеха: " + self.monster['type_KD'] + \
-               "\nСкорость:      " + str(self.monster['Speed']) + \
-               "\nУязвимость:  " + str(self.monster['uazv']) + \
-               "\nИммунитет:  " + str(self.monster['immun'])
+               " (" + self.monster['type_KD'] + ")" + \
+                     "\nХиты:        " + str(self.get_hit()) + \
+                     "\nСкорость:   " + self.get_info_speed()
+
+        uazv = self.get_info_uaz()
+        if len(uazv) > 0:
+            result_str += "\nУязвимость: " + uazv
+
+        sopr = self.get_info_sopr()
+        if len(sopr) > 0:
+            result_str += "\nСопротивление: " + sopr
+
+        immun = self.get_info_immun()
+        if len(immun) > 0:
+            result_str += "\nИммунитет: " + immun
+
+
+
+        return result_str
+
+    def get_naviki(self):
+        result_str = ""
+        for i in self.monster['Naviki']:
+            result_str += i['name'] + ": " + str(i['value']) + "\n"
+        if len(result_str) > 0:
+            result_str = result_str[:len(result_str) - 1]
+        return result_str
+
+    def get_spas(self):
+        result_str = ""
+        a = 1
+        k = 15
+        flag = True
+        for i in self.monster['Spas']:
+            if len(result_str) > k * a:
+                result_str += '\n'
+                if flag == True:
+                    k = len(result_str)
+                    flag = False
+                a += 1
+            result_str += i['name'] + ": " + str(i['value']) + ", "
+
+        if len(result_str) > 0:
+            result_str = result_str[:len(result_str) - 2]
+        return result_str
+
+    def get_chuvstva(self):
+        result_str = ''
+        if self.monster['chuvstva']['slep_zr'] != 0:
+            result_str += '\nСлепое зрение: ' + str(self.monster['chuvstva']['slep_zr'])
+        if self.monster['chuvstva']['istinn_zr'] != 0:
+            result_str += '\nИстинное зрение: ' + str(self.monster['chuvstva']['istinn_zr'])
+        if self.monster['chuvstva']['temn_zr'] != 0:
+            result_str += '\nТемное зрение: ' + str(self.monster['chuvstva']['temn_zr'])
+        return result_str
+
+    def get_language(self):
+        result_str = ''
+        if len(self.monster['Language']) == 0:
+            return 'нет'
+        for i in self.monster['Language']:
+            result_str += i + ', '
+        return result_str
+
+    def get_osobennost(self):
+        result_str = ""
+        for i in self.monster['osobennost']:
+            result_str += '\n' + i['name'] + ": " + i['description']
+        return result_str
+
+    def get_reaction(self):
+        result_str = ""
+        for i in self.monster['reaction']:
+            result_str += '\n' + i['name'] + ': ' + i['description']
+        return result_str
+
+    def get_oruzie(self):
+        result_str = ""
+
+        for i in self.monster['Oruzie']:
+            result_str += "Имя: " + i['Name']
+            if i['oruz'] != 0:
+                if i['oruz'] == 1:
+                    result_str += ' рукопашное'
+                else:
+                    result_str += ' дальнобойное'
+                if len(i['perezar']) != 0:
+                    result_str += str(i['perezar'])
+                result_str += '\nДосягаемость: ' + str(i['dosag']) + ' фт.'
+                result_str += '\nЦель: ' + str(i['cel'])
+                result_str += '\nК попаданию: ' + str(i['k_popad'])
+                result_str += '\nУрон: ' + str(i['uron_ch_k']) + 'k' + str(i['uron_num_k']) + \
+                              ' + ' + str(i['uron_plus']) + '(' + i['type_ur'] + ')'
+                #result_str += '\nОсобенность: ' + i['ossobennost']
+
+            else:
+                #result_str += '\nОсобенность: ' + i['ossobennost']
+                pass
+            result_str += '\n\n'
+
+        return result_str
+
+    def print_all_info1(self):
+        result_str = self.monster['size'] + " " + self.monster['vid'] + \
+                     "\nКД:                  " + str(self.monster['KD']) + \
+                     " (" + self.monster['type_KD'] + ")" + \
+                     "\n\nСкорость:   " + self.get_info_speed() + \
+                     "\nСила:   " + str(self.monster['Power']) + \
+                     "\nЛовкость:  " + str(self.monster['Lovkost']) + \
+                     "\nТелосложение: " + str(self.monster['Tel']) + \
+                     "\nИнтуиция: " + str(self.monster['Intuition']) + \
+                     "\nМудрость: " + str(self.monster['Mudr']) + \
+                     "\nХаризма: " + str(self.monster['Harizma'])
+
+        nav = self.get_naviki()
+        if len(nav) > 0:
+            result_str += '\n' + nav
+
+        result_str += '\n'
+        spas = self.get_spas()
+        if len(spas) > 0:
+            result_str += '\nСпасброски: ' + spas
+
+        uazv = self.get_info_uaz()
+        if len(uazv) > 0:
+            result_str += "\nУязвимость: " + uazv
+
+        sopr = self.get_info_sopr()
+        if len(sopr) > 0:
+            result_str += "\nСопротивление: " + sopr
+
+        immun = self.get_info_immun()
+        if len(immun) > 0:
+            result_str += "\nИммунитет: " + immun
+
+        result_str += "\n\nПассивная внимательность: " + str(self.monster['Pass_vn'])
+        result_str += self.get_chuvstva()
+
+        result_str += "\n\nЯзыки: " + self.get_language()
+        result_str += "\nОпыт за 1: " + str(self.monster['Opit'])
+
+        return result_str
+
+    def print_all_info2(self):
+        result_str = "Особенности: "
+        #result_str += self.get_osobennost()
+        result_str += "\n\nРеакции: "
+        #result_str += self.get_reaction()
+        #result_str += "\n\nОписание: " + self.monster['Opisanie']
+        result_str += "\n\n\nОружие: \n" + self.get_oruzie()
+
+        return result_str
 
 class SettingsWindow(Toplevel):
     def __init__(self, sel_monst, sel_her):
@@ -236,14 +454,27 @@ class MainWindow(Frame):
         self.list_box_monsters.grid(column=1, row=1)
 
     def _init_obj_battle(self):
-        self.lbl_battle = Label()
-        self.lbl_battle.grid(column=0, row=3)
-
-        self.btn_battle = Button(text="Сражение")
+        self.lbl_battle1 = Label()
+        self.lbl_battle1.grid(column=0, row=3)
+        self.lbl_battle2 = Label()
+        self.lbl_battle2.grid(column=0, row=4)
+        self.lbl_battle_time_name = Label(text="Время боя")
+        self.lbl_battle_time_name.grid(column=0, row=5)
+        self.lbl_battle_time = Label()
+        self.lbl_battle_time.grid(column=1, row=5)
+        self.battle_time = 0
+        self.btn_battle = Button(text="Сражение", command=self.clicked_battle)
         self.btn_battle.grid(column=1, row=3)
 
         self.lbl_iniziation = Label()
         self.lbl_iniziation.grid(column=4, row=1)
+
+        self.choose_hero = ""
+        self.choose_monster = ""
+
+    def clicked_battle(self):
+        self.battle_time += 1
+        self.lbl_battle_time.configure(text=str(self.battle_time * 5) + 'сек.')
 
     def fill_list_box_heroes(self):
         for i in self.battle_heroes_name:
@@ -260,7 +491,6 @@ class MainWindow(Frame):
         except:
             self.hero_window[name] = InfoWindowHero(self.heroes.get_info_hero_for_name(name))
 
-
     def on_double_click_monster(self, event):
         kost = self.list_box_monsters.get(self.list_box_monsters.curselection())
         try:
@@ -269,13 +499,14 @@ class MainWindow(Frame):
             self.monster_window[kost] = InfoWindowMonster(self.battle_monsters[kost])
 
     def on_select_hero(self, event):
-        # los.curselection() - получение индекса выделенного элемента
-        # los.get() - получение элемента по его индексу
-        self.lbl_info_heroes.configure(text=self.heroes.print_info_hero_for_name(self.list_box_heroes.get(self.list_box_heroes.curselection())))
+        self.choose_hero = self.list_box_heroes.get(self.list_box_heroes.curselection())
+        self.lbl_info_heroes.configure(text=self.heroes.print_info_hero_for_name(self.choose_hero))
+        self.lbl_battle1.configure(text=self.choose_hero)
 
     def on_select_monster(self, event):
-        self.lbl_info_monsters.configure(text=self.battle_monsters[self.list_box_monsters.get(self.list_box_monsters.curselection())].print_info_for_battle())
-        print(self.list_box_monsters.get(self.list_box_monsters.curselection()))
+        self.choose_monster = self.list_box_monsters.get(self.list_box_monsters.curselection())
+        self.lbl_info_monsters.configure(text=self.battle_monsters[self.choose_monster].print_info_for_battle())
+        self.lbl_battle2.configure(text=self.choose_monster)
 
     def refresh_battle_monster(self):
         self.battle_monsters = {}
@@ -305,6 +536,8 @@ class MainWindow(Frame):
             #self.battle_monsters[self.monster_window[i].get_name()].set_hit(self.monster_window[i].get_hit())
 
     def clicked_update_iniziation(self):
+        self.lbl_battle_time.configure(text="0")
+        self.battle_time = 0
         mas_iniz = []
         for i in self.battle_heroes_name:
             mas_iniz.append([i, self.heroes.get_iniz_for_name(i)])
@@ -359,15 +592,24 @@ class InfoWindowMonster(Toplevel):
         #self.pack(fill=BOTH, expand=1)
 
         self.lbl = Label(self, text=monster.get_name_with_number(), font=("Arial", 18))
-        self.lbl.grid(column=3, row=0)
+        self.lbl.grid(column=0, row=0)
 
         self.monster = monster
 
         self.text = Entry(self)
         self.text.insert(0, str(self.monster.get_hit()))
-        self.text.grid(column=4, row=0)
+        self.text.grid(column=1, row=0)
 
+        self.lbl_all_info1 = Label(self, text=self.monster.print_all_info1(), justify=LEFT)
+        self.lbl_all_info1.grid(column=0, row=1)
+        self.lbl_all_info2 = Label(self, text=self.monster.print_all_info2(), justify=LEFT)
+        self.lbl_all_info2.grid(column=1, row=1)
+        #self.scrollbar = Scrollbar(orient="vertical", command=self.lbl_all_info2.yview)
+        #self.lbl_all_info2.configure(yscrollcommand=self.scrollbar.set)
+        #self.scrollbar.pack(side="right", fill="y")
         self.bind('<Return>', self.click_enter)
+
+
 
     def click_enter(self, event):
         self.monster.set_hit(int(self.text.get()))
@@ -380,6 +622,7 @@ class InfoWindowMonster(Toplevel):
 root = Tk()
 app = MainWindow(root)
 root.title("")
-root.geometry('400x250')
+
+#root.geometry('400x250')
 
 root.mainloop()
